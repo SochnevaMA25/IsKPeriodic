@@ -1,21 +1,9 @@
-//
-//  Algoritm.h
-//  IsKPeriodic
-//
-//  Created by Marina Sochneva on 10.12.2022.
-//
-#define Algoritm_h
+#pragma once
+#include <iostream>
 #include <string>
 
 using namespace std;
 
-bool ThrowIfZero(int x) {
-    if (x <= 0) {
-        cout << "Кратность не может быть равна нулю или быть меньше нуля" << endl;
-        return false;
-    }
-    return true;
-}
 
 class Algoritm
 {
@@ -23,85 +11,50 @@ public:
     const string& txt;
     int* lps;
     int count;
-    Algoritm(int k, const string& t)
-        : count(k), txt(t)
+    int len;
+    Algoritm(const string& t, int len, int k)
+        : txt(t), len(len), count(k)
     {
-        if(ThrowIfZero(count) == true)
+        if (check(count) == true)
         {
-            IsKPeriodic(count, txt);
+            isKPeriodic(txt, len, count);
         }
     }
-    
-void computeLPS(string str, int* lps) // префиксная функция и формирование массива lps для алгоритма КМП
-{
-    int j = 0;
 
-    lps[0] = 0; // lps[0] всегда 0
-
-    int i = 1;
-    while (i < str.size()) {
-        if (str[i] == str[j]) {
-    j++;
-    lps[i] = j;
-    i++;
+    //проверка числа кратности
+    bool check(int x) {
+        if (x <= 0) {
+            cout << "Кратность не может быть равна нулю или быть меньше нуля" << endl;
+            return false;
         }
-        else
-        {
-            if (j != 0) {
-    j = lps[j - 1];
-            }
-            else
-            {
-    lps[i] = 0;
-                i++;
-            }
-        }
+        return true;
     }
-}
-void IsKPeriodic(int K, const string& txt) // функция проверки кратности на основе алгоритма КМП
-{
-    string str; // формируем подстрку, беря начальные символы строки по колличеству К
-    for (int i = 0; i < K; ++i)
-        str.push_back(txt[i]);
 
-    int* lps = new int[str.size()];
-
-    computeLPS(str, lps);
-
-    int i = 0;
-    int j = 0;
-    int value = 0;
-    while (i < txt.size()) {
-        if (str[j] == txt[i])
+    bool isPrefix(string str, int len, int i, int k)
+    {
+        // так как подстрока длины len не может начинаться с индекса i
+        if (i + k > len)
+            return false;
+        for (int j = 0; j < k; j++)
         {
-            j++;
+            //проверка несоответствия символов между префиксом и подстрокой, начинающейся с индекса i
+            if (str[i] != str[j])
+                return false;
             i++;
         }
-        if (j == str.size()) {
-            value++; // считаем совпадения
-            j = lps[j - 1];
-        }
+        return true;
+    }
 
-        else if (i < txt.size() && str[j] != txt[i]) {
-            if (j != 0)
-            {
-                j = lps[j - 1];
-            }
-            else
-            {
-                i = i + 1;
-            }
-        }
-    }
-    if (K * value == txt.size()) // если количество найденных совпадений, помноженное на К, равно длине строки, то строка кратна К
+    //Функция, определяющая соответствует ли заявляенное число кратности строки
+    void isKPeriodic(string str, int len, int k)
     {
-        cout << "Строка " << txt << " кратна " << K << endl;
+        //Проверка все ли подстроки равны к префиксу длины k строки
+        for (int i = k; i < len; i += k)
+            if (!isPrefix(str, len, i, k))
+            {
+                cout << "Строка: " << str << "не кратна числу " << k << endl;
+            }
+        cout << "Строка: " << str << " кратна числу " << k << endl;
     }
-    else
-    {
-        cout << "Строка " << txt << " не кратна " << K << endl; // иначе не кратна
-    }
-    delete[] lps;
-}
 };
 
